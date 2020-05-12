@@ -15,13 +15,15 @@ import logging
 import pickle
 
 
-def cv_train(estimator, trian_save_fname, model_save_fname, n_fold=10, n_file=20):
+def cv_train(feature_index, trian_save_fname, model_save_fname, n_fold=10, n_file=20):
     # file index from 21 to 24 as independent test dataset
     np.random.seed(123)
     file_arr = np.random.permutation(list(range(1, n_file + 1)))
     kf = KFold(n_splits=n_fold)
 
     for k_i, (train_index, val_index) in enumerate(kf.split(file_arr)):
+
+        estimator = LassoEstimator(feature_index)
 
         logging.info('{}/{}-th fold CV'.format(k_i+1, n_fold))
 
@@ -33,7 +35,7 @@ def cv_train(estimator, trian_save_fname, model_save_fname, n_fold=10, n_file=20
                                                    k_i, trian_save_fname_split[1])
 
         model_save_fname_split = os.path.splitext(model_save_fname)
-        model_save_finalname = '{}_cv{}_{}'.format(model_save_fname_split[0],
+        model_save_finalname = '{}_cv{}{}'.format(model_save_fname_split[0],
                                                    k_i, model_save_fname_split[1])
 
         _core(estimator, train_file_index, val_file_index,
@@ -88,7 +90,7 @@ def _core(estimator, train_file_index, val_file_index, trian_save_fname=None, mo
         # save the train result
         if trian_save_fname is not None:
             with open(trian_save_fname, 'a') as tr_f:
-                tr_f.write('{},{.7f}\n'.format(epoch, val_metirc))
+                tr_f.write('{},{:.7f}\n'.format(epoch, val_metirc))
 
         _check = np.where(estimator.mode in ['max', 'auto'],
                           estimator.best_metric < val_metirc + estimator.tol,
