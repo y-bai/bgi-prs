@@ -7,4 +7,4 @@
 Created by YongBai on 2020/5/7 3:49 PM.
 """
 
-from .train_process import cv_train
+from .train_process import cv_train, train
