@@ -45,6 +45,26 @@ def cv_train(feature_index, trian_save_fname, model_save_fname, n_fold=10, n_fil
             print(' {}/{}-th fold CV finished, Epoch: {}'.format(k_i+1, n_fold, estimator.curr_epoch))
 
 
+def train(feature_index, trian_save_fname, model_save_fname, n_file=20):
+    # file index from 21 to 24 as independent test dataset
+    np.random.seed(123)
+    file_arr = np.random.permutation(list(range(1, n_file + 1)))
+
+    estimator = LassoEstimator(feature_index)
+
+    # build train and test dataset
+    train_file_index = file_arr[:n_file-2]
+    val_file_index = file_arr[n_file-2:]
+
+    if os.path.exists(trian_save_fname):
+        os.remove(trian_save_fname)
+    if os.path.exists(model_save_fname):
+        os.remove(model_save_fname)
+
+    _core(estimator, train_file_index, val_file_index,
+          trian_save_fname=trian_save_fname, model_save_fname=model_save_fname)
+
+
 def _core(estimator, train_file_index, val_file_index, trian_save_fname=None, model_save_fname=None):
 
     if trian_save_fname is not None and os.path.exists(trian_save_fname):
@@ -102,9 +122,10 @@ def _core(estimator, train_file_index, val_file_index, trian_save_fname=None, mo
             estimator.best_metric = val_metirc
             estimator.curr_not_changed = 0
 
-            if model_save_fname is not None and os.path.exists(model_save_fname):
+            if model_save_fname is not None :
                 print('Model saved at {}'.format(model_save_fname))
-                os.remove(model_save_fname)
+                if os.path.exists(model_save_fname):
+                    os.remove(model_save_fname)
                 pickle.dump(estimator, open(model_save_fname, 'wb'))
         else:
             estimator.curr_not_changed += 1
