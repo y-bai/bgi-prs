@@ -11,6 +11,7 @@ import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 from ..preprocess.dataloader import load_data_fsubset
+from ..models import LassoEstimator
 import logging
 import pickle
 
